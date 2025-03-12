@@ -1,4 +1,4 @@
-import CardManager from "../js/СardManager.js";
+import CardManager from "../js/СardManager";
 
 export default class InputWidget {
   constructor(column) {
@@ -55,7 +55,7 @@ export default class InputWidget {
       return;
     }
 
-    this._manager.createCard(inputField.value);
+    this._manager.createCard(inputField.value, false);
 
     this.hideWidget();
   }

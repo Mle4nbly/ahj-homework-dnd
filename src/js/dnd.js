@@ -1,3 +1,5 @@
+import { saveCards } from "./localStorage.js";
+
 let currentCard;
 let cardShadow;
 
@@ -5,6 +7,8 @@ let offsetX, offsetY;
 let cardWidth, cardHeight;
 
 export function onMouseDown(e) {
+  e.preventDefault();
+
   if (e.target.classList.contains("cross")) {
     return;
   }
@@ -23,12 +27,16 @@ export function onMouseDown(e) {
   offsetY = e.clientY - currentCard.getBoundingClientRect().top;
 
   cardShadow = createShadow(currentCard);
+  shadowPlacement(e);
 
   document.addEventListener("mousemove", onMouseMove);
   document.addEventListener("mouseup", onMouseUp);
+  currentCard.removeEventListener("mousedown", onMouseDown);
 }
 
 function onMouseMove(e) {
+  e.preventDefault();
+
   currentCard.style.top = e.clientY - offsetY - 16 + "px";
   currentCard.style.left = e.clientX - offsetX - 8 + "px";
 
@@ -42,40 +50,12 @@ function onMouseMove(e) {
     return;
   }
 
-  const cardAll = document.querySelectorAll(".card");
-  let targetCard = getTarget(cardAll, e);
-
-  if (targetCard) {
-    const rect = targetCard.getBoundingClientRect();
-
-    if (e.clientY < rect.top + rect.height / 2) {
-      cardShadow.remove();
-
-      targetCard.insertAdjacentElement("beforebegin", cardShadow);
-    } else if (e.clientY > rect.top + rect.height / 2) {
-      cardShadow.remove();
-
-      targetCard.insertAdjacentElement("afterend", cardShadow);
-    }
-  } else {
-    const columns = document.querySelectorAll(".column");
-
-    let targetColumn = getTarget(columns, e);
-
-    if (targetColumn) {
-      if (!targetColumn.querySelector(".shadow")) {
-        const cards = targetColumn.querySelector(".cards");
-
-        cardShadow.remove();
-        cards.appendChild(cardShadow);
-      }
-
-      return;
-    }
-  }
+  shadowPlacement(e);
 }
 
-function onMouseUp() {
+function onMouseUp(e) {
+  e.preventDefault();
+
   cardShadow.insertAdjacentElement("afterend", currentCard);
   cardShadow.remove();
   cardShadow = undefined;
@@ -87,6 +67,10 @@ function onMouseUp() {
 
   currentCard.style.top = "";
   currentCard.style.left = "";
+
+  currentCard.addEventListener("mousedown", onMouseDown);
+
+  saveCards();
 
   currentCard = undefined;
 
@@ -100,6 +84,39 @@ function createShadow(card) {
   shadow.style.height = card.style.height;
 
   return shadow;
+}
+
+function shadowPlacement(event) {
+  const cardAll = document.querySelectorAll(".card");
+  let targetCard = getTarget(cardAll, event);
+
+  if (targetCard) {
+    const rect = targetCard.getBoundingClientRect();
+
+    if (event.clientY < rect.top + rect.height / 2) {
+      cardShadow.remove();
+
+      targetCard.insertAdjacentElement("beforebegin", cardShadow);
+    } else if (event.clientY > rect.top + rect.height / 2) {
+      cardShadow.remove();
+
+      targetCard.insertAdjacentElement("afterend", cardShadow);
+    }
+  } else {
+    const columns = document.querySelectorAll(".column");
+    let targetColumn = getTarget(columns, event);
+
+    if (targetColumn) {
+      if (!targetColumn.querySelector(".shadow")) {
+        const cards = targetColumn.querySelector(".cards");
+
+        cardShadow.remove();
+        cards.appendChild(cardShadow);
+      }
+
+      return;
+    }
+  }
 }
 
 function getTarget(elements, event) {

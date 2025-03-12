@@ -1,5 +1,6 @@
 import InputWidget from "../components/InputWidget.js";
-import { initColumn } from "./dnd.alternative.js"
+import CardManager from "./СardManager.js";
+// import { initColumn } from "./dnd.alternative.js"
 
 const columns = document.querySelectorAll('.column');
 let currentWidget = undefined;
@@ -20,4 +21,3 @@ columns.forEach((column) => {
         currentWidget = inputWidget;
     });
 })
-

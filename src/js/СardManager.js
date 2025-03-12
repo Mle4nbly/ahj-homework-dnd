@@ -1,4 +1,5 @@
 // import { initCard } from "./dnd.alternative.js";
+import { saveCards } from "./localStorage.js";
 import { onMouseDown } from "./dnd.js";
 
 export default class CardManager {
@@ -9,10 +10,12 @@ export default class CardManager {
     this.onCross = this.onCross.bind(this);
     this.onCard = this.onCard.bind(this);
 
+    this.loadCards();
+
     this._actualElement = undefined;
   }
 
-  createCard(content) {
+  createCard(content, isRender) {
     const newCard = document.createElement("div");
 
     newCard.className = "card";
@@ -26,10 +29,18 @@ export default class CardManager {
 
     newCard.addEventListener("mousedown", onMouseDown);
     // initCard(newCard);
+
+    if (isRender) {
+      return;
+    }
+
+    saveCards();
   }
 
   removeCard(element) {
     element.remove();
+
+    saveCards();
   }
 
   onCard(e) {
@@ -46,8 +57,16 @@ export default class CardManager {
 
   innerCard(content) {
     return `
-            ${content}
-            <div class="cross hidden">✖</div>
-        `;
+                <div class="card-content">${content}</div>
+                <div class="cross hidden">✖</div>
+            `;
+  }
+
+  loadCards() {
+    const data = JSON.parse(localStorage.getItem(`data`)) || [];
+
+    data[`column_${this._column.dataset.id}`].forEach((content) => {
+      this.createCard(content, true);
+    });
   }
 }
