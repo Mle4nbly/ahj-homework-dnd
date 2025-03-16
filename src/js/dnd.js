@@ -9,7 +9,7 @@ let cardWidth, cardHeight;
 export function onMouseDown(e) {
   e.preventDefault();
 
-  if (e.target.classList.contains("cross")) {
+  if (e.target.classList.contains("cross") || e.target.className != 'card') {
     return;
   }
 
